@@ -1,46 +1,72 @@
+# Напрямки перевірки: праворуч, вниз, діагональ вниз-право, діагональ вниз-ліво
 DIRECTIONS = [(0, 1), (1, 0), (1, 1), (1, -1)]
 
 def is_valid(x, y):
+    """
+    Перевіряє, чи координати (x, y) лежать у межах поля 19x19.
+    """
     return 0 <= x < 19 and 0 <= y < 19
 
 def check_win(board, color):
+    """
+    Перевіряє, чи є п’ять каменів поспіль у будь-якому з допустимих напрямків.
+
+    Повертає:
+        - (color, i + 1, j + 1), якщо знайдено точку початку виграшної послідовності.
+        - (0, ), якщо переможної послідовності не знайдено.
+    """
     for i in range(19):
         for j in range(19):
             if board[i][j] != color:
-                continue
+                continue  # ця клітинка пуста, пропускаємо
             for dx, dy in DIRECTIONS:
+                # Перевіряємо, чи ця клітинка є початком послідовності,
+                # тобто попередня в цьому напрямку не має такого самого кольору
                 ni, nj = i - dx, j - dy
                 if is_valid(ni, nj) and board[ni][nj] == color:
-                    continue  # не початок послідовності
+                    continue  # не початок послідовності, пропускаємо
+                
                 count = 0
                 x, y = i, j
+                # Рахуємо кількість однакових каменів у напрямку (dx, dy)
                 while is_valid(x, y) and board[x][y] == color:
                     count += 1
-                    if count > 5:
+                    if count > 5:  # більше п’яти — перебір
                         break
                     x += dx
                     y += dy
                 if count == 5:
+                    # Повертаємо колір і координати першого каменя
                     return (color, i + 1, j + 1)
     return (0, )
 
 def main():
+    """
+    Основна функція:
+    - Зчитує кількість тестів та ігрові дошки з файлу input.txt.
+    - Для кожного тесту визначає, чи є переможець.
+    - Записує результат у файл output.txt у форматі:
+        * 0 — якщо немає переможця;
+        * color — якщо виграв color і перший камінь послідовності в (x, y).
+    """
     with open("input.txt", "r") as f:
         lines = f.read().split()
 
     idx = 0
-    T = int(lines[idx])
+    T = int(lines[idx])  # кількість тестів
     idx += 1
 
     output = []
 
     for _ in range(T):
         board = []
+        # Зчитування 19 рядків по 19 чисел
         for _ in range(19):
             row = list(map(int, lines[idx:idx + 19]))
             board.append(row)
             idx += 19
 
+        # Перевіряємо спочатку чорних (1), потім білих (2)
         for color in [1, 2]:
             result = check_win(board, color)
             if result[0] != 0:
