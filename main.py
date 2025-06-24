@@ -1,3 +1,7 @@
+# Constants
+BOARD_SIZE = 19
+WIN_LENGTH = 5
+
 # Напрямки перевірки: праворуч, вниз, діагональ вниз-право, діагональ вниз-ліво
 DIRECTIONS = [(0, 1), (1, 0), (1, 1), (1, -1)]
 
@@ -5,7 +9,7 @@ def is_valid(x, y):
     """
     Перевіряє, чи координати (x, y) лежать у межах поля 19x19.
     """
-    return 0 <= x < 19 and 0 <= y < 19
+    return 0 <= x < BOARD_SIZE and 0 <= y < BOARD_SIZE
 
 def check_win(board, color):
     """
@@ -15,26 +19,24 @@ def check_win(board, color):
         - (color, i + 1, j + 1), якщо знайдено точку початку виграшної послідовності.
         - (0, ), якщо переможної послідовності не знайдено.
     """
-    for i in range(19):
-        for j in range(19):
+    for i in range(BOARD_SIZE):
+        for j in range(BOARD_SIZE):
             if board[i][j] != color:
                 continue  # ця клітинка не належить гравцю, пропускаємо
             for dx, dy in DIRECTIONS:
-                # Перевіряємо, чи ця клітинка є початком послідовності
                 ni, nj = i - dx, j - dy
                 if is_valid(ni, nj) and board[ni][nj] == color:
                     continue  # не початок послідовності
                 
                 count = 0
                 x, y = i, j
-                # Рахуємо кількість поспіль однакових каменів у напрямку (dx, dy)
                 while is_valid(x, y) and board[x][y] == color:
                     count += 1
-                    if count > 5:
+                    if count > WIN_LENGTH:
                         break  # понад 5 — не виграшна послідовність
                     x += dx
                     y += dy
-                if count == 5:
+                if count == WIN_LENGTH:
                     return (color, i + 1, j + 1)
     return (0, )
 
@@ -51,24 +53,24 @@ def main():
         lines = f.read().split()
 
     idx = 0
-    T = int(lines[idx])  # кількість тестів
+    T = int(lines[idx])
     idx += 1
 
     output = []
 
     for test_num in range(T):
         board = []
-        for row_num in range(19):
-            if idx + 19 > len(lines):
+        for row_num in range(BOARD_SIZE):
+            if idx + BOARD_SIZE > len(lines):
                 raise ValueError(f"Недостатньо даних для зчитування {row_num+1}-го рядка {test_num+1}-го тесту.")
-            row = list(map(int, lines[idx:idx + 19]))
-            if len(row) != 19:
-                raise ValueError(f"Рядок {row_num + 1} не містить 19 елементів у {test_num+1}-му тесті.")
+            row = list(map(int, lines[idx:idx + BOARD_SIZE]))
+            if len(row) != BOARD_SIZE:
+                raise ValueError(f"Рядок {row_num + 1} не містить {BOARD_SIZE} елементів у {test_num+1}-му тесті.")
             board.append(row)
-            idx += 19
+            idx += BOARD_SIZE
 
-        if len(board) != 19:
-            raise ValueError(f"Дошка {test_num+1} не містить 19 рядків")
+        if len(board) != BOARD_SIZE:
+            raise ValueError(f"Дошка {test_num+1} не містить {BOARD_SIZE} рядків")
 
         # Перевірка виграшу спочатку для чорного (1), потім для білого (2)
         for color in [1, 2]:
